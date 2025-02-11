@@ -16,7 +16,7 @@ export async function createStripeConnectSession() {
       client_id: import.meta.env.VITE_STRIPE_CLIENT_ID,
       response_type: 'code',
       scope: 'read_write',
-      redirect_uri: `${import.meta.env.VITE_APP_URL}/api/stripe-connect-callback`,
+      redirect_uri: 'https://nrvhyrkegwhrfovftjtz.supabase.co/functions/v1/stripe-connect-callback',
       state: session.access_token,
     });
 
