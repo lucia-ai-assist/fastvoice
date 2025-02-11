@@ -26,24 +26,3 @@ export async function createStripeConnectSession() {
     throw new Error(error.message);
   }
 }
-
-// Add the callback handler
-export async function handleStripeCallback(code: string) {
-  try {
-    const response = await stripe.oauth.token({
-      grant_type: 'authorization_code',
-      code,
-    });
-    
-    // Store the connected account ID in your database if needed
-    const connectedAccountId = response.stripe_user_id;
-    
-    // Redirect to dashboard
-    window.location.href = `${import.meta.env.VITE_APP_URL}/dashboard`;
-    
-    return response;
-  } catch (error: any) {
-    console.error('Error handling Stripe callback:', error);
-    throw new Error(error.message);
-  }
-}
