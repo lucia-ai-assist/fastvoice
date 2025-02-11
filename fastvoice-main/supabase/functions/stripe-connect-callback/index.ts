@@ -66,8 +66,6 @@ serve(async (req) => {
         'Location': 'https://www.fastvoice.online/dashboard?stripe_connect=success',
         'Cache-Control': 'no-store',
         'Pragma': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       },
     })
   } catch (error) {
