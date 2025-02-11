@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Invoice } from "@/types/invoice";
+import type { Database } from "@/types/database.types";
 import { StripeConnect } from "@/components/dashboard/StripeConnect";
 import { InvoiceForm } from "@/components/dashboard/InvoiceForm";
 import { InvoiceList } from "@/components/dashboard/InvoiceList";
@@ -32,17 +32,21 @@ export default function Dashboard() {
 
   const checkStripeConnection = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
       const { data, error } = await supabase
-        .from('stripe_connect_accounts')
+        .from('users')
         .select('stripe_account_id')
-        .maybeSingle();
+        .eq('id', session.user.id)
+        .single();
 
       if (error) {
         console.error('Error checking Stripe connection:', error);
         return;
       }
       
-      setStripeConnected(!!data);
+      setStripeConnected(!!data?.stripe_account_id);
     } catch (error) {
       console.error('Error checking Stripe connection:', error);
       toast({
