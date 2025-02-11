@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { createStripeConnectSession } from "@/pages/stripe-connect-callback";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StripeConnectProps {
   isConnected: boolean;
@@ -12,9 +12,21 @@ export function StripeConnect({ isConnected }: StripeConnectProps) {
 
   const handleStripeConnect = async () => {
     try {
-      const { url } = await createStripeConnectSession();
-      if (url) {
-        window.location.href = url;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to connect your Stripe account.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-stripe-connect-session');
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
         throw new Error('Failed to get Stripe Connect URL');
       }
