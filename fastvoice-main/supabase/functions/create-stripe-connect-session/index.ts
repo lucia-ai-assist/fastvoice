@@ -1,27 +1,25 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
-import Stripe from "https://esm.sh/stripe@13.10.0"
+import { createStripeConnectUrl } from "../_shared/stripe.ts"
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-  apiVersion: '2023-10-16',
-})
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 serve(async (req) => {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  }
-
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const connectAccountURL = await stripe.oauth.authorizeUrl({
-      client_id: Deno.env.get('STRIPE_CLIENT_ID') || '',
-      response_type: 'code',
-      scope: 'read_write',
-      redirect_uri: 'https://nrvhyrkegwhrfovftjtz.supabase.co/functions/v1/stripe-connect-callback',
-    })
+    // Log environment variables (without sensitive data)
+    console.log('Environment check:', {
+      hasStripeKey: !!Deno.env.get('STRIPE_SECRET_KEY'),
+      hasClientId: !!Deno.env.get('STRIPE_CLIENT_ID'),
+    });
+
+    const connectAccountURL = await createStripeConnectUrl();
+    console.log('Generated URL:', connectAccountURL.split('?')[0]);
 
     return new Response(
       JSON.stringify({ url: connectAccountURL }),
@@ -31,6 +29,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

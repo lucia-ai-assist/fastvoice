@@ -1,0 +1,5 @@
+
+project_id = "nrvhyrkegwhrfovftjtz"
+
+[functions.create-stripe-connect-session]
+verify_jwt = true
