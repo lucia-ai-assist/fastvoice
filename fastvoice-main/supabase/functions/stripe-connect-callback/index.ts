@@ -64,13 +64,23 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         'Location': 'https://www.fastvoice.online/dashboard?stripe_connect=success',
+        'Cache-Control': 'no-store',
+        'Pragma': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       },
     })
   } catch (error) {
     console.error('Error handling Stripe callback:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Redirect to dashboard with error parameter
+    return new Response(null, {
+      status: 302,
+      headers: {
+        ...corsHeaders,
+        'Location': 'https://www.fastvoice.online/dashboard?stripe_connect=error',
+        'Cache-Control': 'no-store',
+        'Pragma': 'no-cache',
+      },
     })
   }
 }) 
