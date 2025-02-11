@@ -5,7 +5,7 @@ export interface Database {
         Row: {
           id: string;
           email: string;
-          stripe_account_id?: string;
+          stripe_account_id: string | null;
           created_at: string;
           updated_at: string;
         };

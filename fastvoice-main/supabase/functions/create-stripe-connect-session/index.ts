@@ -12,15 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    // Log environment variables (without sensitive data)
-    console.log('Environment check:', {
-      hasStripeKey: !!Deno.env.get('STRIPE_SECRET_KEY'),
-      hasClientId: !!Deno.env.get('STRIPE_CLIENT_ID'),
-    });
+    const { state } = await req.json();
+    if (!state) {
+      throw new Error('Missing state parameter');
+    }
 
-    const connectAccountURL = await createStripeConnectUrl();
-    console.log('Generated URL:', connectAccountURL.split('?')[0]);
-
+    const connectAccountURL = await createStripeConnectUrl(state);
     return new Response(
       JSON.stringify({ url: connectAccountURL }),
       { 

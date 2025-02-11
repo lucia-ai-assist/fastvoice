@@ -23,20 +23,26 @@ serve(async (req) => {
   
   console.log('Received callback with:', { code: code?.substring(0, 10), state: state?.substring(0, 10) })
   
-  if (!code) {
-    return new Response(JSON.stringify({ error: 'No code provided' }), { 
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+  if (!code || !state) {
+    console.error('Missing code or state')
+    return new Response(
+      JSON.stringify({ error: 'Missing required parameters' }), 
+      { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
   }
 
   try {
-    console.log('Exchanging code for token...')
+    // Exchange code for Stripe account ID
     const response = await stripe.oauth.token({
       grant_type: 'authorization_code',
       code,
     })
-    console.log('Got Stripe response:', { account_id: response.stripe_user_id })
+
+    const stripeAccountId = response.stripe_user_id
+    console.log('Got Stripe account ID:', stripeAccountId)
 
     // Create Supabase client
     const supabase = createClient(
@@ -44,19 +50,21 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     )
 
-    // Store the connected account ID
-    const connectedAccountId = response.stripe_user_id
-    if (connectedAccountId && state) {
-      // Update user's stripe_account_id in your database
-      const { error } = await supabase
-        .from('users')
-        .update({ stripe_account_id: connectedAccountId })
-        .eq('id', state)
-      
-      if (error) {
-        console.error('Error updating user:', error)
-      }
+    // Update the user's stripe_account_id in the users table
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        stripe_account_id: stripeAccountId,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', state)
+
+    if (updateError) {
+      console.error('Error updating user:', updateError)
+      throw updateError
     }
+
+    console.log('Successfully updated user with Stripe account ID')
 
     // Redirect to dashboard with success parameter
     return new Response(null, {
@@ -69,8 +77,7 @@ serve(async (req) => {
       },
     })
   } catch (error) {
-    console.error('Error handling Stripe callback:', error)
-    // Redirect to dashboard with error parameter
+    console.error('Error in callback:', error)
     return new Response(null, {
       status: 302,
       headers: {
