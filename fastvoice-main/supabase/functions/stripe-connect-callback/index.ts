@@ -63,7 +63,7 @@ serve(async (req) => {
       status: 302,
       headers: {
         ...corsHeaders,
-        'Location': `${Deno.env.get('APP_URL')}/dashboard?stripe_connect=success`,
+        'Location': 'https://www.fastvoice.online/dashboard?stripe_connect=success',
       },
     })
   } catch (error) {
