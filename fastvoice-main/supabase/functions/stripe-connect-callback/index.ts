@@ -21,10 +21,14 @@ serve(async (req) => {
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
   
-  console.log('Received callback with:', { code: code?.substring(0, 10), state: state?.substring(0, 10) })
+  console.log('Received callback:', { 
+    code: code?.substring(0, 10), 
+    state: state?.substring(0, 10),
+    url: url.toString()
+  })
   
   if (!code || !state) {
-    console.error('Missing code or state')
+    console.error('Missing parameters:', { code, state })
     return new Response(
       JSON.stringify({ error: 'Missing required parameters' }), 
       { 
