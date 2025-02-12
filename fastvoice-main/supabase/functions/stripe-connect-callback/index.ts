@@ -39,38 +39,23 @@ serve(async (req) => {
   }
 
   try {
-    // Exchange code for Stripe account ID
     const response = await stripe.oauth.token({
       grant_type: 'authorization_code',
       code,
     })
 
-    const stripeAccountId = response.stripe_user_id
-    console.log('Got Stripe account ID:', stripeAccountId)
-
-    // Create Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') || '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     )
 
-    // Update the user's stripe_account_id in the users table
-    const { error: updateError } = await supabase
+    await supabase
       .from('users')
-      .update({ 
-        stripe_account_id: stripeAccountId,
-        updated_at: new Date().toISOString()
-      })
+      .update({ stripe_account_id: response.stripe_user_id })
       .eq('id', state)
-
-    if (updateError) {
-      console.error('Error updating user:', updateError)
-      throw updateError
-    }
 
     console.log('Successfully updated user with Stripe account ID')
 
-    // Redirect to dashboard with success parameter
     return new Response(null, {
       status: 302,
       headers: {

@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  font-family: 'Gabarito', sans-serif !important;
+}
+
 @layer base {
   html {
     font-family: 'Gabarito', sans-serif;
