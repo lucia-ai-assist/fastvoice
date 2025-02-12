@@ -135,7 +135,10 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-gabarito font-bold mb-8">Dashboard</h1>
+      <div className="flex items-center gap-4 mb-8">
+        <img src="/icon.png" alt="FastVoice Logo" className="h-10 w-10" />
+        <h1 className="text-3xl font-gabarito font-bold">Dashboard</h1>
+      </div>
       
       <StripeConnect isConnected={stripeConnected} />
 
