@@ -7,11 +7,12 @@ export const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
 
 // Add a helper function for OAuth
 export const createStripeConnectUrl = (state: string) => {
+  const baseUrl = 'https://nrvhyrkegwhrfovftjtz.supabase.co/functions/v1';
   return stripe.oauth.authorizeUrl({
     client_id: Deno.env.get('STRIPE_CLIENT_ID') || '',
     response_type: 'code',
     scope: 'read_write',
     state,
-    redirect_uri: 'https://nrvhyrkegwhrfovftjtz.supabase.co/functions/v1/stripe-connect-callback',
+    redirect_uri: `${baseUrl}/stripe-connect-callback`,
   });
 };
